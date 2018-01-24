@@ -36,7 +36,7 @@ func (ct *CacheTable) Initialize() {
 	if len(ct.Files) == 0 {
 		log.Fatal("No Files found")
 	}
-	ct.Size = ct.AvailableRamSpace() / 2
+	ct.Size =  1024 * 512 //ct.AvailableRamSpace() / 2
 	ct.Populate()
 }
 
@@ -58,7 +58,6 @@ func (ct *CacheTable) Populate() {
 		co := CacheObject{ct.RamDiskPath + name, false, false}
 		ct.Table = append(ct.Table, co)
 		log.Println("Caching: " + name)
-		log.Println("CurrentSize: " + ct.CurrentSize + " SizeCap: " + ct.Size)
 	}
 	ct.Files = ct.Files[end:]
 }
@@ -123,7 +122,20 @@ func (ct *CacheTable) Completed(path string) {
 func (ct *CacheTable) IsEmpty() bool {
 	ct.lock.Lock()
 	defer ct.lock.Unlock()
-	return (len(ct.Table) == 0 && len(ct.Files) == 0)
+	return (len(ct.Table) == 0 && len(ct.Files) == 0 && ct.AllInProcess())
+}
+
+func (ct * CacheTable) AllInProcess() bool {
+	status := true
+	ct.lock.Lock()
+	for cacheObj := range ct.Table {
+		if !cacheObj.InProcess {
+			status = false
+			break
+		}
+	}
+	ct.lock.Unlock()
+	return status
 }
 
 func (ct *CacheTable) GetFilePath() string {
