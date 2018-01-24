@@ -58,6 +58,7 @@ func (ct *CacheTable) Populate() {
 		co := CacheObject{ct.RamDiskPath + name, false, false}
 		ct.Table = append(ct.Table, co)
 		log.Println("Caching: " + name)
+		log.Println("CurrentSize: " + ct.CurrentSize + " SizeCap: " + ct.Size)
 	}
 	ct.Files = ct.Files[end:]
 }
